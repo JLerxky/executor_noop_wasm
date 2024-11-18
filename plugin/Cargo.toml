@@ -1,0 +1,14 @@
+[package]
+name = "executor_core"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+extism-pdk.workspace = true
+
+[lints]
+workspace = true

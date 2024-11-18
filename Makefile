@@ -6,7 +6,8 @@ debug:
 	$(CARGO) build --all
 
 release:
-	$(CARGO) build --all  --release
+	$(CARGO) build -p executor  --release
+	$(CARGO) build -p executor_plugin  --release --target wasm32-unknown-unknown
 
 test:
 	RUST_BACKTRACE=full $(CARGO) test --all 2>&1

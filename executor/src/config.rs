@@ -46,8 +46,8 @@ impl Default for ExecutorConfig {
         Self {
             executor_port: 50002,
             db_path: "data".to_string(),
-            wasm_path: "executor.wasm".to_string(),
-            enable_metrics: true,
+            wasm_path: "executor_core.wasm".to_string(),
+            enable_metrics: false,
             metrics_port: 60002,
             metrics_buckets: vec![
                 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0, 25.0, 50.0, 75.0, 100.0, 250.0, 500.0,

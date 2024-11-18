@@ -63,4 +63,4 @@ logs/
 # db file
 *.db
 
-data/
+*.wasm

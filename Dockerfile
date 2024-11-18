@@ -2,7 +2,7 @@ FROM rust:slim-bullseye AS buildstage
 WORKDIR /build
 COPY . /build/
 ENV PROTOC_NO_VENDOR 1
-RUN rustup component add rustfmt && \
+RUN rustup component add rustfmt &&  rustup target add wasm32-unknown-unknown \
     apt-get update && \
     apt-get install -y --no-install-recommends cmake make wget librocksdb-dev libsnappy-dev liblz4-dev libzstd-dev libssl-dev pkg-config clang protobuf-compiler && \
     apt-get clean && \
@@ -16,5 +16,6 @@ RUN apt-get update && \
 RUN useradd -m chain
 USER chain
 COPY --from=buildstage /build/target/release/executor /usr/bin/
+COPY --from=buildstage /buildtarget/wasm32-unknown-unknown/release/executor_core.wasm /usr/bin/
 COPY --from=ghcr.io/grpc-ecosystem/grpc-health-probe:v0.4.19 /ko-app/grpc-health-probe /usr/bin/
 CMD ["executor"]

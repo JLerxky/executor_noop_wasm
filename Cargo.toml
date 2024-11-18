@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[package]
-name = "executor_noop_wasm"
-version = "6.7.4"
+[workspace]
+resolver = "2"
+members = ["executor", "plugin"]
+
+[workspace.package]
 authors = [
-    "Yieazy <yuitta@163.com>",
     "Rivtower Technologies <contact@rivtower.com>",
+    "JLer <jlerxky@live.com>",
 ]
-license = "Apache-2.0"
+version = "6.7.4"
 edition = "2021"
 
-[dependencies]
+[workspace.dependencies]
 tonic = "0.12"
 prost = "0.13"
 tokio = { version = "1.41", features = ["full"] }
@@ -33,6 +35,7 @@ serde_derive = "1.0"
 lazy_static = "1.5"
 tower = "0.5"
 extism = "1.8"
+extism-pdk = "1.3"
 
 util = { package = "cita-util", version = "0.1" }
 tracing = "0.1"
@@ -41,6 +44,17 @@ tonic-web = "0.12"
 
 cloud-util = { package = "cloud-util", git = "https://github.com/cita-cloud/cloud-common-rs" }
 cita_cloud_proto = { package = "cita_cloud_proto", git = "https://github.com/cita-cloud/cloud-common-rs" }
+
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_copy_implementations = "warn"
+missing_debug_implementations = "warn"
+unused_crate_dependencies = "warn"
+unused_extern_crates = "warn"
+
+[workspace.lints.clippy]
+missing_const_for_fn = "warn"
 
 [profile.release.package."*"]
 # Set the default for dependencies.
