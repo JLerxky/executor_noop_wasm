@@ -1,0 +1,11 @@
+[executor_noop_wasm]
+executor_port = 50002
+db_path = 'data'
+domain = "test-chain-node1"
+
+[executor_noop_wasm.log_config]
+max_level = "info"
+filter = "info"
+# rolling_file_path = "./logs"
+service_name = "executor"
+# agent_endpoint = "localhost:6831"
