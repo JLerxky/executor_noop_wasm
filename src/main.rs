@@ -21,10 +21,13 @@ use cita_cloud_proto::EXECUTOR_DESCRIPTOR_SET;
 use clap::{crate_authors, crate_version, Arg, Command};
 use cloud_util::metrics::{run_metrics_exporter, MiddlewareLayer};
 use executor_server::ExecutorServer;
+use extism::{Manifest, Plugin, Wasm};
+use parking_lot::RwLock;
 #[macro_use]
 extern crate tracing as logger;
 use std::error::Error;
 use std::path::Path;
+use std::sync::Arc;
 use std::time::Duration;
 use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
@@ -92,7 +95,12 @@ async fn run(opts: &clap::ArgMatches) -> Result<(), Box<dyn Error>> {
         "db_path must be relative path"
     );
 
-    let inner = ExecutorServer {};
+    let wasm = Wasm::file(&config.wasm_path);
+    let manifest = Manifest::new([wasm]);
+    let plugin = Plugin::new(manifest, [], true).unwrap();
+    let inner = ExecutorServer {
+        wasm_runtime: Arc::new(RwLock::new(plugin)),
+    };
     let executor_svc =
         ExecutorServiceServer::new(inner.clone()).max_decoding_message_size(usize::MAX);
     let rpc_svc = RpcServiceServer::new(inner).max_decoding_message_size(usize::MAX);

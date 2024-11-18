@@ -22,6 +22,8 @@ pub struct ExecutorConfig {
 
     pub db_path: String,
 
+    pub wasm_path: String,
+
     pub enable_metrics: bool,
 
     pub metrics_port: u16,
@@ -44,6 +46,7 @@ impl Default for ExecutorConfig {
         Self {
             executor_port: 50002,
             db_path: "data".to_string(),
+            wasm_path: "executor.wasm".to_string(),
             enable_metrics: true,
             metrics_port: 60002,
             metrics_buckets: vec![

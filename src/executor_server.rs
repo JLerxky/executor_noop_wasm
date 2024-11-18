@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::sync::Arc;
+
 use cita_cloud_proto::blockchain::Block as CloudBlock;
 use cita_cloud_proto::common::{Hash as CloudHash, HashResponse};
 use cita_cloud_proto::evm::rpc_service_server::RpcService;
@@ -25,21 +27,42 @@ use cita_cloud_proto::executor::executor_service_server::ExecutorService;
 use cita_cloud_proto::executor::{
     CallRequest as CloudCallRequest, CallResponse as CloudCallResponse,
 };
+use extism::Plugin;
+use parking_lot::RwLock;
+use prost::Message;
 use tonic::{Code, Request, Response, Status};
 
 #[derive(Clone)]
-pub struct ExecutorServer {}
+pub struct ExecutorServer {
+    pub wasm_runtime: Arc<RwLock<Plugin>>,
+}
+
+fn grpc_call_wasm<T, U>(wasm_runtime: Arc<RwLock<Plugin>>, method: &str, input: T) -> U
+where
+    T: Message,
+    U: Message + Default,
+{
+    let block_raw = T::encode_to_vec(&input);
+    let res_raw = wasm_runtime
+        .write()
+        .call::<Vec<u8>, Vec<u8>>(method, block_raw)
+        .unwrap();
+    U::decode(&*res_raw).unwrap()
+}
 
 #[tonic::async_trait]
 impl ExecutorService for ExecutorServer {
     #[instrument(skip_all)]
     async fn exec(&self, request: Request<CloudBlock>) -> Result<Response<HashResponse>, Status> {
         cloud_util::tracer::set_parent(&request);
-        let block = request.into_inner();
-        debug!("get exec request: {:x?}", block);
+        let raw_request = request.into_inner();
+        debug!("get exec request: {:x?}", raw_request);
 
-        // TODO
-        Ok(Response::new(HashResponse::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "exec",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -49,8 +72,11 @@ impl ExecutorService for ExecutorServer {
     ) -> Result<Response<CloudCallResponse>, Status> {
         cloud_util::tracer::set_parent(&request);
 
-        // TODO
-        Ok(Response::new(CloudCallResponse::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "call",
+            request.into_inner(),
+        )))
     }
 }
 
@@ -62,11 +88,14 @@ impl RpcService for ExecutorServer {
         request: Request<CloudHash>,
     ) -> Result<Response<CloudReceipt>, Status> {
         cloud_util::tracer::set_parent(&request);
-        let cloud_hash = request.into_inner();
-        debug!("get_transaction_receipt request: {:x?}", cloud_hash);
+        let raw_request = request.into_inner();
+        debug!("get_transaction_receipt request: {:x?}", raw_request);
 
-        // TODO
-        Ok(Response::new(CloudReceipt::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_transaction_receipt",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -86,8 +115,11 @@ impl RpcService for ExecutorServer {
             return Err(Status::new(Code::InvalidArgument, "Block number is none"));
         }
 
-        // TODO
-        Ok(Response::new(CloudByteCode::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_code",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -107,8 +139,11 @@ impl RpcService for ExecutorServer {
             return Err(Status::new(Code::InvalidArgument, "Block number is none"));
         }
 
-        // TODO
-        Ok(Response::new(CloudBalance::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_balance",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -128,8 +163,11 @@ impl RpcService for ExecutorServer {
             return Err(Status::new(Code::InvalidArgument, "Block number is none"));
         }
 
-        // TODO
-        Ok(Response::new(CloudNonce::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_transaction_count",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -149,8 +187,11 @@ impl RpcService for ExecutorServer {
             return Err(Status::new(Code::InvalidArgument, "Block number is none"));
         }
 
-        // TODO
-        Ok(Response::new(CloudByteAbi::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_abi",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -159,11 +200,14 @@ impl RpcService for ExecutorServer {
         request: Request<CloudCallRequest>,
     ) -> Result<Response<CloudByteQuota>, Status> {
         cloud_util::tracer::set_parent(&request);
-        let call_request = request.into_inner();
-        debug!("estimate_quota request: {:x?}", call_request);
+        let raw_request = request.into_inner();
+        debug!("estimate_quota request: {:x?}", raw_request);
 
-        // TODO
-        Ok(Response::new(CloudByteQuota::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "estimate_quota",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -171,11 +215,14 @@ impl RpcService for ExecutorServer {
         &self,
         request: Request<CloudHash>,
     ) -> Result<Response<ReceiptProof>, Status> {
-        let cloud_hash = request.into_inner();
-        debug!("get_receipt_proof request: {:x?}", cloud_hash);
+        let raw_request = request.into_inner();
+        debug!("get_receipt_proof request: {:x?}", raw_request);
 
-        // TODO
-        Ok(Response::new(ReceiptProof::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_receipt_proof",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -183,11 +230,14 @@ impl RpcService for ExecutorServer {
         &self,
         request: Request<BlockNumber>,
     ) -> Result<Response<RootsInfo>, Status> {
-        let block_number = request.into_inner();
-        debug!("get_roots_info request: {:?}", block_number);
+        let raw_request = request.into_inner();
+        debug!("get_roots_info request: {:?}", raw_request);
 
-        // TODO
-        Ok(Response::new(RootsInfo::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_roots_info",
+            raw_request,
+        )))
     }
 
     #[instrument(skip_all)]
@@ -210,7 +260,10 @@ impl RpcService for ExecutorServer {
             return Err(Status::new(Code::InvalidArgument, "Block number is none"));
         }
 
-        // TODO
-        Ok(Response::new(CloudHash::default()))
+        Ok(Response::new(grpc_call_wasm(
+            self.wasm_runtime.clone(),
+            "get_storage_at",
+            raw_request,
+        )))
     }
 }
