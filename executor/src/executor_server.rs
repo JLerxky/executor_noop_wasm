@@ -29,7 +29,7 @@ use cita_cloud_proto::executor::{
 };
 use extism::Plugin;
 use parking_lot::RwLock;
-use prost::Message;
+use serde::{Deserialize, Serialize};
 use tonic::{Code, Request, Response, Status};
 
 #[derive(Clone)]
@@ -37,17 +37,22 @@ pub struct ExecutorServer {
     pub wasm_runtime: Arc<RwLock<Plugin>>,
 }
 
-fn grpc_call_wasm<T, U>(wasm_runtime: Arc<RwLock<Plugin>>, method: &str, input: T) -> U
+fn grpc_call_wasm<T, U>(
+    wasm_runtime: Arc<RwLock<Plugin>>,
+    method: &str,
+    input: T,
+) -> Result<U, Status>
 where
-    T: Message,
-    U: Message + Default,
+    T: Serialize,
+    U: Default + for<'a> Deserialize<'a>,
 {
-    let block_raw = T::encode_to_vec(&input);
+    let res_raw =
+        serde_json::to_string(&input).map_err(|_| Status::internal("json encode error"))?;
     let res_raw = wasm_runtime
         .write()
-        .call::<Vec<u8>, Vec<u8>>(method, block_raw)
-        .unwrap();
-    U::decode(&*res_raw).unwrap()
+        .call::<String, String>(method, res_raw)
+        .map_err(|_| Status::internal("wasm call error"))?;
+    Ok(serde_json::from_str::<U>(&res_raw).unwrap_or_default())
 }
 
 #[tonic::async_trait]
@@ -62,7 +67,7 @@ impl ExecutorService for ExecutorServer {
             self.wasm_runtime.clone(),
             "exec",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -76,7 +81,7 @@ impl ExecutorService for ExecutorServer {
             self.wasm_runtime.clone(),
             "call",
             request.into_inner(),
-        )))
+        )?))
     }
 }
 
@@ -95,7 +100,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_transaction_receipt",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -119,7 +124,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_code",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -143,7 +148,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_balance",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -167,7 +172,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_transaction_count",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -191,7 +196,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_abi",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -207,7 +212,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "estimate_quota",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -222,7 +227,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_receipt_proof",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -237,7 +242,7 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_roots_info",
             raw_request,
-        )))
+        )?))
     }
 
     #[instrument(skip_all)]
@@ -264,6 +269,6 @@ impl RpcService for ExecutorServer {
             self.wasm_runtime.clone(),
             "get_storage_at",
             raw_request,
-        )))
+        )?))
     }
 }

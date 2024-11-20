@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use cloud_util::{common::read_toml, tracer::LogConfig};
-use serde_derive::Deserialize;
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
 #[serde(default)]

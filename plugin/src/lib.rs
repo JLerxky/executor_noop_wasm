@@ -1,78 +1,81 @@
+// Copyright Rivtower Technologies LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use extism_pdk::*;
 
 #[plugin_fn]
-pub fn exec(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn exec(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn call(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn call(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_transaction_receipt(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_transaction_receipt(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_code(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_code(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_balance(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_balance(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_transaction_count(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_transaction_count(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_abi(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_abi(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn estimate_quota(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn estimate_quota(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_receipt_proof(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_receipt_proof(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_roots_info(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_roots_info(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
 
 #[plugin_fn]
-pub fn get_storage_at(input: Vec<u8>) -> FnResult<Vec<u8>> {
-    let _ = input;
+pub fn get_storage_at(_json: String) -> FnResult<String> {
     // TODO
-    Ok(vec![])
+    Ok(String::new())
 }
